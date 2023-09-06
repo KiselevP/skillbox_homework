@@ -11,13 +11,18 @@ public class Main {
         Link rootLink = new Link(rootUrl);
         rootLink.setLevel(0);
 
-        ForkJoinPool pool = new ForkJoinPool();
+        ForkJoinPool pool = new ForkJoinPool(Runtime.getRuntime().availableProcessors());
 
         Task task = new Task(rootLink);
         pool.invoke(task);
         task.fork();
         task.join();
+        pool.close();
 
+        for (Link link : task.getVisitedUrls().values())
+        {
+            System.out.println("\t".repeat(link.getLevel()) + " " + link.getAddress() + " " + link.getLevel() + " " + link.getParentName());
+        }
 
         try (FileWriter writer = new FileWriter(file)) {
             writer.write("");

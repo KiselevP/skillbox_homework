@@ -1,10 +1,10 @@
 import java.util.List;
 
 public class Link {
-    private String address;
+    private volatile String address;
     private volatile int level;
-    private List<Link> childList;
-    private String parentAddress;
+    private volatile List<Link> childList;
+    private volatile String parentAddress;
 
     public Link(String address) {
         this.address = address;

@@ -19,25 +19,30 @@ public class HtmlParser {
     }
 
     public HtmlParser(Link link) {
-        try {
-            sleep(150);
-            list = new ArrayList<>();
-            Document doc = Jsoup.connect(link.getAddress())
-                    .ignoreHttpErrors(true)
-                    .ignoreContentType(false).timeout(1500)
-                    .followRedirects(false).get();
-            Elements elements = doc.select("a");
-            for (Element element : elements) {
-                String url = element.absUrl("href");
-                Link linkChild = new Link(url);
-                if (isLink(linkChild) &&
-                        linkChild.getAddress().contains(link.getAddress())) list.add(linkChild);
+        synchronized (link) {
+            try {
+                sleep(150);
+                list = new ArrayList<>();
+                Document doc = Jsoup.connect(link.getAddress())
+                        .ignoreHttpErrors(true)
+                        .ignoreContentType(true).timeout(1500)
+                        .followRedirects(false).get();
+                Elements elements = doc.select("a");
+                for (Element element : elements) {
+                    String url = element.absUrl("href");
+                    Link linkChild = new Link(url);
+                    if (isLink(linkChild))
+                    {
+                        list.add(linkChild);
+                    }
+                }
+                link.setChildList(list);
+            } catch (SocketTimeoutException e) {
+                System.out.println("Таймаут при чтении данных");
+            } catch (IOException | InterruptedException e) {
+                System.err.println("Ошибка со стороны сайта");
+                ;
             }
-            link.setChildList(list);
-        } catch (SocketTimeoutException e) {
-            System.out.println("Таймаут при чтении данных");
-        } catch (IOException | InterruptedException e) {
-            System.err.println("Ошибка со стороны сайта");;
         }
     }
 
