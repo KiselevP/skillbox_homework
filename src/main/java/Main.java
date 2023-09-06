@@ -1,43 +1,28 @@
-import org.fusesource.jansi.AnsiConsole;
-
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.concurrent.ForkJoinPool;
 
-import static org.fusesource.jansi.Ansi.ansi;
-
 public class Main {
+    public static void main(String[] args) {
+        File file = new File("src/main/resources/urls.txt");
+        String rootUrl = "https://skillbox.com/";
 
-    public static void main(String[] args) throws Exception {
+        Link rootLink = new Link(rootUrl);
+        rootLink.setLevel(0);
 
-        try {
-            ParametersBag parametersBag = new ParametersBag(args);
+        ForkJoinPool pool = new ForkJoinPool();
 
-            String folderPath = parametersBag.getPath();
-            long sizeLimit = parametersBag.getLimit();
+        Task task = new Task(rootLink);
+        pool.invoke(task);
+        task.fork();
+        task.join();
 
-            File file = new File(folderPath);
-            Node root = new Node(file, sizeLimit);
 
-            long start = System.currentTimeMillis();
-
-            FolderSizeCalculator calculator = new FolderSizeCalculator(root);
-            ForkJoinPool pool = new ForkJoinPool();
-            pool.invoke(calculator);
-
-            System.out.println(root);
-
-            long duration = System.currentTimeMillis() - start;
-            System.out.println(duration + " ms");
-        } catch (MyException ex) {
-           logColorUsingJANSI(ex.getMessage());
+        try (FileWriter writer = new FileWriter(file)) {
+            writer.write("");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
-    }
-    private static void logColorUsingJANSI(String massage) {
-        AnsiConsole.systemInstall();
-        System.out.println(ansi()
-                .fgRed()
-                .a(massage)
-                .reset());
-        AnsiConsole.systemUninstall();
     }
 }
