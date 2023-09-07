@@ -31,7 +31,7 @@ public class HtmlParser {
                 for (Element element : elements) {
                     String url = element.absUrl("href");
                     Link linkChild = new Link(url);
-                    if (isLink(linkChild))
+                    if (isLink(linkChild) && linkChild.getAddress().startsWith(Main.rootUrl))
                     {
                         list.add(linkChild);
                     }
